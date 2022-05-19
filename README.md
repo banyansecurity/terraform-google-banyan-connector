@@ -57,10 +57,9 @@ terraform plan
 | <a name="input_machine_type"></a> [machine\_type](#input\_machine\_type) | VM machine type to use when creating Connector instance | `string` | `"e2-standard-2"` | no |
 | <a name="input_management_cidrs"></a> [management\_cidrs](#input\_management\_cidrs) | CIDR blocks to allow SSH connections from | `list(string)` | `[ "0.0.0.0/0" ]` | no |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | String to be added in front of all AWS object names | `string` | `"banyan"` | no |
-| <a name="input_network"></a> [subnet\_id](#input\subnet\_id) | Name of the network where the Connector instance should be created | `string` | n/a | yes |
+| <a name="input_network"></a> [network](#input\network) | Name of the network where the Connector instance should be created | `string` | n/a | yes |
 | <a name="input_package_version"></a> [package\_version](#input\_package\_version) | Override to use a specific version of connector (e.g. `1.3.0`) | `string` | `null` | no |
 | <a name="input_project"></a> [project](#project) | GCP project in which to create the Connector | `string` | n/a | yes |
-| <a name="input_ssh_key_path"></a> [ssh\_key\_path](#input\_ssh\_key\_path) | Path of your SSH key to upload to instance to allow management access | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Add tags to each resource | `map(any)` | `null` | no |
 
 
