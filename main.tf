@@ -9,7 +9,7 @@ terraform {
       version = "~> 4.21.0"
     }
     time = {
-      source = "hashicorp/time"
+      source  = "hashicorp/time"
       version = "0.7.2"
     }
   }
@@ -18,7 +18,7 @@ terraform {
 provider "google" {
   project = var.project
   region  = var.region
-  zone    = "${var.region}-a"    
+  zone    = "${var.region}-a"
 }
 
 provider "banyan" {
@@ -30,12 +30,13 @@ locals {
   labels = merge(var.labels, {
     provider = "banyan"
   })
+  connector_vm_name = "${var.name_prefix}-connector"
 }
 
 resource "banyan_api_key" "connector_key" {
-  name              = var.connector_name
-  description       = var.connector_name
-  scope             = "satellite"
+  name        = var.connector_name
+  description = var.connector_name
+  scope       = "satellite"
 }
 
 resource "banyan_connector" "connector_spec" {
@@ -72,12 +73,13 @@ echo 'connector_name: ${var.connector_name}' >> connector-config.yaml
 INIT_SCRIPT
 }
 
-resource "google_compute_instance" "vm_instance" {
+resource "google_compute_instance" "connector_vm" {
   depends_on = [time_sleep.connector_health_check]
-  
+
   name         = "${var.name_prefix}-connector"
   machine_type = var.machine_type
 
+  tags   = [local.connector_vm_name]
   labels = local.labels
 
   boot_disk {
@@ -87,9 +89,32 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   network_interface {
-    network = "default"
+    network = var.network
   }
 
   metadata_startup_script = local.init_script
+}
+
+resource "google_compute_firewall" "connector_ingress" {
+  name          = "${var.name_prefix}-connector-management"
+  network       = var.network
+  direction     = "INGRESS"
+  target_tags   = [local.connector_vm_name]
+  source_ranges = var.management_cidrs
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+}
+
+resource "google_compute_firewall" "connector_egress" {
+  name          = "${var.name_prefix}-connector-global-edge"
+  network       = var.network
+  direction     = "EGRESS"
+  target_tags   = [local.connector_vm_name]
+  destination_ranges = ["0.0.0.0/0"]
+  allow {
+    protocol = "all"
+  }
 }
 
